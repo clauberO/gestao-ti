@@ -1,30 +1,64 @@
-# GESTÃO TI — GitHub Pages
+# GESTÃO TI · versão oficial em desenvolvimento
 
-Versão de demonstração preparada para publicação no GitHub Pages.
-Todo o visual e JavaScript estão incorporados em `index.html`. Não precisa de pasta web, Docker, instalação de pacotes ou arquivos CSS/JS separados.
+Primeira etapa funcional do sistema, com autenticação, dados no servidor e perfis de acesso. Projeto de uma única organização: clientes são cadastros da operação, não organizações isoladas. Não usar como SaaS multiempresa sem implementar isolamento por organização.
 
-## Publicar pelo navegador
+## Dois ambientes
 
-1. Extraia `gestao-ti-github.zip` no Windows.
-2. Abra seu repositório `gestao-ti` no GitHub.
-3. Clique em **Add file → Upload files**.
-4. Envie os dois arquivos extraídos: **index.html** e **README.md**, diretamente na raiz do repositório, sem uma pasta envolvendo os arquivos. O novo README substitui as instruções anteriores da Oracle.
-5. Clique em **Commit changes**, na branch **main**.
-6. Abra **Settings → Pages**.
-7. Em **Source**, escolha **Deploy from a branch**.
-8. Selecione **main** e **/(root)**, depois **Save**.
-9. Aguarde a publicação. O link aparecerá nessa mesma página em **Visit site**.
+- `main` / `index.html`: demonstração pública já publicada no GitHub Pages.
+- `oficial-v1` / `server/`: aplicação Django com PostgreSQL, preparada para implantação própria na VPS. Não é executada pelo GitHub Pages.
 
-Não envie o ZIP fechado para publicar o site: envie os dois arquivos de dentro dele. Os arquivos Docker anteriores podem permanecer; não são usados pelo Pages. Se já houver app.js e style.css no repositório, não são necessários para este index.html, que é independente.
+Os arquivos Docker antigos da raiz pertencem à demonstração anterior. Para esta versão, use somente `compose.oficial.yaml` e `server/Dockerfile`.
 
-## Funcionalidades da prévia
+## Entrega inicial
 
-Modo claro/escuro; painel; chamados; atividades; agenda em lista; equipamentos; clientes; unidades; manutenção; relatórios CSV e configurações demonstrativas. Navegação usa URLs com #, compatíveis com a pasta do projeto no GitHub Pages.
+- Login real por usuário e senha; logout por POST e alteração de senha.
+- Cadastro e desativação de contas por administradores, sem senha padrão.
+- Perfis de administrador, gestor e técnico verificados no servidor.
+- Chamados e atividades com responsável, prioridade, prazo, status e comentários.
+- Clientes, unidades, equipamentos e agenda em lista.
+- Pesquisa, paginação e exportação CSV de chamados.
+- Histórico das alterações operacionais e proteção contra sobrescrita concorrente de chamados/atividades.
+- Layout responsivo com modo claro e escuro.
+- Migrations, testes automatizados e workflow de CI com PostgreSQL.
 
-Dados armazenados somente no navegador. Login, recuperação e integrações são simulações; nenhum e-mail é enviado e nenhuma senha é gravada. Não há banco de dados compartilhado ou controle de acesso real. Use dados fictícios.
+## Desenvolvimento local
+
+Python 3.12. No terminal, dentro de `server/`:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export DEBUG=1
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 127.0.0.1:8000
+```
+
+PowerShell: ative com `.\.venv\Scripts\Activate.ps1` e use `$env:DEBUG="1"` no lugar de `export DEBUG=1`.
+Abra http://127.0.0.1:8000. O login e a senha são os que você definir no `createsuperuser`. Não existe conta inicial embutida no código.
+
+O ambiente local usa SQLite por conveniência; a configuração de produção exige PostgreSQL. Somente a preferência de tema utiliza localStorage; os cadastros e as sessões ficam no servidor.
 
 ## Validação
 
-Empacotamento e referências internas verificados. CSS e JavaScript incorporados sem alterações de comportamento. Sintaxe JavaScript verificada. A versão anterior passou por verificações de lógica em DOM simulado; não houve teste visual em navegador neste ambiente. Publicação e execução na sua conta GitHub ainda precisam ser verificadas após o envio.
+```bash
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py collectstatic --noinput
+python manage.py test --noinput
+```
 
-Documentação oficial: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+Resultados e limitações da execução: [docs/VALIDACAO.md](docs/VALIDACAO.md).
+
+## Documentação
+
+- [Instalação na VPS, conta de administrador e backup](docs/IMPLANTACAO.md)
+- [Arquitetura e regras de acesso](docs/ARQUITETURA.md)
+- [Próximas entregas](docs/ROADMAP.md)
+
+## Estado da implantação
+
+Código inicial para revisão e homologação. Ainda é necessário configurar a VPS, domínio/HTTPS, criar a conta inicial, testar o backup e validar a interface em navegador antes de colocar dados reais. A aplicação não foi instalada automaticamente no servidor Oracle.
+
+Recuperação de senha por e-mail, anexos, SLA por calendário útil, integrações, notificações e manutenção de equipamentos continuam no roadmap. Nenhuma dessas funções é simulada como se estivesse ativa nesta versão.
