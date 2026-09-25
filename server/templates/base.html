@@ -1,0 +1,19 @@
+{% load static %}<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ title|default:"Gestão TI" }} · Gestão TI</title><link rel="stylesheet" href="{% static 'app.css' %}"><script src="{% static 'theme.js' %}"></script></head>
+<body><a class="skip" href="#conteudo">Pular para conteúdo</a>
+{% if user.is_authenticated %}<aside id="sidebar"><a class="brand" href="{% url 'dashboard' %}"><b>▣</b> GESTÃO TI<small>Central de operações</small></a><nav aria-label="Menu principal">
+<a href="{% url 'dashboard' %}" {% if active == 'inicio' %}aria-current="page"{% endif %}>⌂ <span>Visão geral</span></a>
+<a href="{% url 'list' 'atividades' %}" {% if active == 'atividades' %}aria-current="page"{% endif %}>☑ <span>Atividades</span></a>
+<a href="{% url 'list' 'chamados' %}" {% if active == 'chamados' %}aria-current="page"{% endif %}>▤ <span>Chamados</span></a>
+<a href="{% url 'list' 'agenda' %}" {% if active == 'agenda' %}aria-current="page"{% endif %}>▦ <span>Agenda</span></a>
+<a href="{% url 'list' 'equipamentos' %}" {% if active == 'equipamentos' %}aria-current="page"{% endif %}>▣ <span>Equipamentos</span></a>
+<a href="{% url 'list' 'clientes' %}" {% if active == 'clientes' %}aria-current="page"{% endif %}>♙ <span>Clientes</span></a>
+<a href="{% url 'list' 'unidades' %}" {% if active == 'unidades' %}aria-current="page"{% endif %}>◇ <span>Unidades</span></a>
+{% if user.manages %}<a href="{% url 'reports' %}" {% if active == 'relatorios' %}aria-current="page"{% endif %}>▥ <span>Relatórios</span></a>{% endif %}
+{% if user.administrator %}<a href="{% url 'team' %}">♙ <span>Equipe e permissões</span></a>{% endif %}
+{% if user.is_superuser %}<a href="{% url 'admin:index' %}">⚙ <span>Administração</span></a>{% endif %}
+</nav><div class="profile"><strong>{{ user }}</strong><small>{% if user.is_superuser %}Administrador{% else %}{{ user.get_role_display }}{% endif %}</small><a href="{% url 'password_change' %}">Alterar senha</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="linkbutton">Sair da conta</button></form></div></aside>
+<div class="shell"><header><div><button id="menu-toggle" class="mobile" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir menu">☰</button><span class="muted">Meu espaço /</span> {{ title|truncatechars:60 }}</div><button class="theme-toggle" type="button">◐ Tema</button></header><main id="conteudo">
+{% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}
+{% block content %}{% endblock %}<footer>GESTÃO TI · Central de operações</footer></main></div>
+{% else %}<main id="conteudo">{% block public %}{% endblock %}</main>{% endif %}<script src="{% static 'app.js' %}" defer></script></body></html>
